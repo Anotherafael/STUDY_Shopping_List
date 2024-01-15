@@ -1,23 +1,20 @@
 import 'package:study_shopping_list_app/data/categories_dummy_data.dart';
 
 import '../models/category.dart';
-import '../models/grocery_item.dart';
+import '../models/shopping_item.dart';
 
-List<GroceryItem> groceryItemsDummyData = [
-  GroceryItem(
-    id: 'a',
+List<ShoppingItem> groceryItemsDummyData = [
+  ShoppingItem(
     name: 'Milk',
     quantity: 1,
     category: categoriesDummyData[Categories.dairy],
   ),
-  GroceryItem(
-    id: 'b',
+  ShoppingItem(
     name: 'Bananas',
     quantity: 5,
     category: categoriesDummyData[Categories.fruit]!,
   ),
-  GroceryItem(
-    id: 'c',
+  ShoppingItem(
     name: 'Beef Steak',
     quantity: 1,
     category: categoriesDummyData[Categories.meat]!,
