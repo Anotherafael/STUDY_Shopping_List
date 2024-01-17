@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:study_shopping_list_app/core/providers/shopping_item_provider.dart';
 import 'package:study_shopping_list_app/modules/my_shopping_list/components/my_shopping_list_card_item.dart';
 
+import '../../models/shopping_item.dart';
 import '../add_item/add_item_page.dart';
 
 class MyShoppingListPage extends ConsumerStatefulWidget {
@@ -14,9 +15,12 @@ class MyShoppingListPage extends ConsumerStatefulWidget {
 }
 
 class _MyShoppingListPageState extends ConsumerState<MyShoppingListPage> {
+  late Future<List<ShoppingItem>> _loadedItems;
+
   @override
   void initState() {
     super.initState();
+    _loadedItems = ref.read(shoppingItemProvider.notifier).loadItems();
   }
 
   @override
@@ -38,53 +42,37 @@ class _MyShoppingListPageState extends ConsumerState<MyShoppingListPage> {
         title: const Text("My Shopping List"),
       ),
       body: FutureBuilder(
-        future: ref.read(shoppingItemProvider.notifier).loadItems(),
+        future: _loadedItems,
         builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
+
           if (snapshot.hasError) {
-            return ref.watch(shoppingItemProvider.notifier).isEmpty()
-                ? Center(
-                    child: Text(
-                      'No items',
-                      textAlign: TextAlign.center,
-                      style:
-                          Theme.of(context).textTheme.headlineMedium!.copyWith(
-                                fontFamily: GoogleFonts.aBeeZee().fontFamily,
-                              ),
-                    ),
-                  )
-                : const Center(
-                    child: Text(
-                      'Something went wrong',
-                    ),
-                  );
-          } else {
-            return ref.watch(shoppingItemProvider.notifier).isEmpty()
-                ? Center(
-                    child: Text(
-                      'No items',
-                      textAlign: TextAlign.center,
-                      style:
-                          Theme.of(context).textTheme.headlineMedium!.copyWith(
-                                fontFamily: GoogleFonts.aBeeZee().fontFamily,
-                              ),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: ref.watch(shoppingItemProvider).length,
-                    itemBuilder: (context, index) {
-                      final shoppingItem =
-                          ref.watch(shoppingItemProvider)[index];
-                      return MyShoppingListCardItemWidget(
-                        shoppingItem: shoppingItem,
-                      );
-                    },
-                  );
+            return const Center(
+              child: Text(
+                'Something went wrong',
+              ),
+            );
           }
+
+          if (snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text('No items'),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: ref.watch(shoppingItemProvider).length,
+            itemBuilder: (context, index) {
+              final shoppingItem = ref.watch(shoppingItemProvider)[index];
+              return MyShoppingListCardItemWidget(
+                shoppingItem: shoppingItem,
+              );
+            },
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

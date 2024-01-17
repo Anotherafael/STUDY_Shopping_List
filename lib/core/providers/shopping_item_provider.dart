@@ -11,9 +11,18 @@ class ShoppingItemNotifier extends StateNotifier<List<ShoppingItem>> {
   final _baseUrl = 'flutter-prep-624f5-default-rtdb.firebaseio.com';
   final _baseJson = 'shopping-list.json';
 
-  Future<void> loadItems() async {
+  Future<List<ShoppingItem>> loadItems() async {
     final url = Uri.https(_baseUrl, _baseJson);
     final response = await http.get(url);
+
+    if (response.statusCode >= 400) {
+      throw Exception('Failed to load items');
+    }
+
+    if (response.body.isEmpty || response.body == 'null') {
+      return [];
+    }
+
     final Map<String, dynamic> data = json.decode(response.body);
     final List<ShoppingItem> items = [];
 
@@ -31,6 +40,7 @@ class ShoppingItemNotifier extends StateNotifier<List<ShoppingItem>> {
       );
     }
     state = items;
+    return items;
   }
 
   Future<void> addItem(ShoppingItem item) async {
