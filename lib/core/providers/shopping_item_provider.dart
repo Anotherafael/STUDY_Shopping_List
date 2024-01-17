@@ -51,12 +51,12 @@ class ShoppingItemNotifier extends StateNotifier<List<ShoppingItem>> {
   }
 
   Future<String> removeItem(ShoppingItem item) async {
-    final url = Uri.https(_baseUrl, 'shoping-list/${item.id}.json');
+    final url = Uri.https(_baseUrl, 'shopping-list/${item.id}.json');
 
     if (state.contains(item)) {
       final res = await http.delete(url);
-      if (res.statusCode != 400) {
-        await loadItems();
+      state.removeWhere((element) => element.id == item.id);
+      if (res.statusCode >= 400) {
         return 'Something went wrong. Try again later.';
       }
     }

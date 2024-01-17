@@ -46,11 +46,22 @@ class _MyShoppingListPageState extends ConsumerState<MyShoppingListPage> {
             );
           }
           if (snapshot.hasError) {
-            return const Center(
-              child: Text(
-                'Something went wrong',
-              ),
-            );
+            return ref.watch(shoppingItemProvider.notifier).isEmpty()
+                ? Center(
+                    child: Text(
+                      'No items',
+                      textAlign: TextAlign.center,
+                      style:
+                          Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                fontFamily: GoogleFonts.aBeeZee().fontFamily,
+                              ),
+                    ),
+                  )
+                : const Center(
+                    child: Text(
+                      'Something went wrong',
+                    ),
+                  );
           } else {
             return ref.watch(shoppingItemProvider.notifier).isEmpty()
                 ? Center(
