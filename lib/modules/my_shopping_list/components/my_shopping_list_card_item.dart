@@ -16,9 +16,20 @@ class MyShoppingListCardItemWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Dismissible(
-      key: Key(shoppingItem.id),
-      onDismissed: (_) {
-        ref.read(shoppingItemProvider.notifier).removeItem(shoppingItem);
+      key: Key(shoppingItem.id!),
+      onDismissed: (_) async {
+        final msg = await ref
+            .read(shoppingItemProvider.notifier)
+            .removeItem(shoppingItem);
+        // ignore: unrelated_type_equality_checks
+        if (msg != '') {
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(msg),
+            ),
+          );
+        }
       },
       child: Card(
         margin: const EdgeInsets.symmetric(

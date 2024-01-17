@@ -17,6 +17,28 @@ class AddItemPage extends ConsumerStatefulWidget {
 class _AddItemPageState extends ConsumerState<AddItemPage> {
   final _formKey = GlobalKey<FormState>();
   final _shoppingItem = ShoppingItem();
+  var _isLoading = false;
+
+  void addItem() async {
+    if (_formKey.currentState!.validate()) {
+      if (_isLoading) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+      _formKey.currentState!.save();
+      ref.read(shoppingItemProvider.notifier).addItem(_shoppingItem);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) {
+            return const MyShoppingListPage();
+          },
+        ),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +124,9 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => _formKey.currentState!.reset(),
+                    onPressed: _isLoading
+                        ? null
+                        : () => _formKey.currentState!.reset(),
                     child: Text(
                       'Cancel',
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
@@ -117,27 +141,23 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                         Theme.of(context).primaryColor,
                       ),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        ref.read(shoppingItemProvider.notifier).addItem(
-                              _shoppingItem,
-                            );
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) {
-                              return const MyShoppingListPage();
-                            },
+                    onPressed: () => _isLoading ? null : addItem(),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(),
+                          )
+                        : Text(
+                            'Add Item',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall!
+                                .copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
                           ),
-                        );
-                      }
-                    },
-                    child: Text(
-                      'Add Item',
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                    ),
                   ),
                 ],
               )

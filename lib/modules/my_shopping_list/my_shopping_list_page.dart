@@ -6,11 +6,21 @@ import 'package:study_shopping_list_app/modules/my_shopping_list/components/my_s
 
 import '../add_item/add_item_page.dart';
 
-class MyShoppingListPage extends ConsumerWidget {
+class MyShoppingListPage extends ConsumerStatefulWidget {
   const MyShoppingListPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyShoppingListPage> createState() => _MyShoppingListPageState();
+}
+
+class _MyShoppingListPageState extends ConsumerState<MyShoppingListPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -27,25 +37,45 @@ class MyShoppingListPage extends ConsumerWidget {
         ),
         title: const Text("My Shopping List"),
       ),
-      body: ref.watch(shoppingItemProvider.notifier).isEmpty()
-          ? Center(
+      body: FutureBuilder(
+        future: ref.read(shoppingItemProvider.notifier).loadItems(),
+        builder: (_, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.hasError) {
+            return const Center(
               child: Text(
-                'No items',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontFamily: GoogleFonts.aBeeZee().fontFamily,
-                    ),
+                'Something went wrong',
               ),
-            )
-          : ListView.builder(
-              itemCount: ref.watch(shoppingItemProvider).length,
-              itemBuilder: (context, index) {
-                final shoppingItem = ref.watch(shoppingItemProvider)[index];
-                return MyShoppingListCardItemWidget(
-                  shoppingItem: shoppingItem,
-                );
-              },
-            ),
+            );
+          } else {
+            return ref.watch(shoppingItemProvider.notifier).isEmpty()
+                ? Center(
+                    child: Text(
+                      'No items',
+                      textAlign: TextAlign.center,
+                      style:
+                          Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                fontFamily: GoogleFonts.aBeeZee().fontFamily,
+                              ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: ref.watch(shoppingItemProvider).length,
+                    itemBuilder: (context, index) {
+                      final shoppingItem =
+                          ref.watch(shoppingItemProvider)[index];
+                      return MyShoppingListCardItemWidget(
+                        shoppingItem: shoppingItem,
+                      );
+                    },
+                  );
+          }
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(
